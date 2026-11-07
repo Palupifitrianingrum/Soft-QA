@@ -1,0 +1,15 @@
+// Mirrors backend/app/schemas.py. Keep in sync when the API changes.
+export type Severity = "critical" | "high" | "medium" | "low" | "info";
+
+export interface SystemStatus { ai_configured: boolean; ai_provider: string; ai_message: string; ai_model: string; ruff_available: boolean; semgrep_available: boolean; semgrep_mode: string; docker_available: boolean; docker_message: string; sandbox_image_ready: boolean; max_upload_mb: number }
+export interface FileInfo { id: number; path: string; language: string; size_bytes: number; line_count: number }
+export interface FileContent extends FileInfo { content: string }
+export interface Project { id: number; name: string; kind: string; created_at: string; file_count: number; skipped_files: number }
+export interface ProjectDetail extends Project { files: FileInfo[] }
+export interface AnalysisOptions { use_ai: boolean; run_ruff: boolean; run_semgrep: boolean; max_ai_files: number }
+export interface Analysis { id: number; project_id: number; project_name: string; status: "pending" | "running" | "completed" | "failed"; stage: string; options: Record<string, unknown>; warnings: string[]; error: string | null; created_at: string; started_at: string | null; finished_at: string | null; findings_count: number }
+export interface Finding { id: string; source: string; title: string; severity: Severity; category: string; file: string; line_start: number; line_end: number; description: string; evidence: string; recommendation: string; confidence: number; status: "confirmed" | "potential"; rule_id: string | null; evidence_verified: boolean; corroborated_by: string[] }
+export interface TestCase { id: number; test_id: string; test_name: string; description: string; test_type: string; input: unknown; expected_result: string; priority: string; target_file: string; code: string; validation_status: "valid" | "rejected"; validation_notes: string[]; approved: boolean; last_result: string | null }
+export interface TestExecution { id: number; analysis_id: number; status: string; tests_run: number; passed: number; failed: number; errors: number; duration_seconds: number; coverage_percent: number | null; coverage_files: Record<string, number>; per_test: Record<string, string>; stdout: string; stderr: string; message: string; created_at: string }
+export interface Stats { projects: number; analyses: number; bugs_detected: number; critical_vulnerabilities: number; tests_executed: number; severity_distribution: Record<string, number>; recent_analyses: Analysis[] }
+export interface Report { analysis_id: number; generated_at: string; project: { id: number; name: string; kind: string }; overview: { files_total: number; python_files: number; total_lines: number; skipped_files: number }; findings_total: number; confirmed_count: number; potential_count: number; severity_distribution: Record<string, number>; security_findings: Finding[]; tests: { generated: number; approved: number; rejected_by_validation: number; latest_execution: TestExecution | null }; quality: { score: number; note: string }; summary: string; recommendations: string[]; warnings: string[]; ai_used: boolean }

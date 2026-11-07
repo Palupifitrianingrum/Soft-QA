@@ -1,0 +1,3 @@
+# Semgrep is not supported natively on Windows. Use WSL2/Linux/macOS, or let SOFT QA
+# fall back to the official semgrep/semgrep Docker image (see README).
+semgrep>=1.70

@@ -1,0 +1,48 @@
+# Small bundled Semgrep rule set so security scanning works offline. Registry rulesets add coverage.
+rules:
+  - id: aura.hardcoded-credential
+    languages: [python]
+    severity: ERROR
+    message: Possible hardcoded credential. Secrets must not live in source code. (CWE-798)
+    metadata: {cwe: ["CWE-798"], owasp: "A07:2021"}
+    pattern-regex: '(?i)\b(password|passwd|secret|api_?key|token)\b\s*=\s*["''][^"'']{4,}["'']'
+  - id: aura.eval-exec
+    languages: [python]
+    severity: ERROR
+    message: eval()/exec() on dynamic data allows code injection. (CWE-95)
+    metadata: {cwe: ["CWE-95"], owasp: "A03:2021"}
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+  - id: aura.subprocess-shell-true
+    languages: [python]
+    severity: ERROR
+    message: subprocess call with shell=True can lead to command injection. (CWE-78)
+    metadata: {cwe: ["CWE-78"], owasp: "A03:2021"}
+    pattern: subprocess.$FUNC(..., shell=True, ...)
+  - id: aura.os-system
+    languages: [python]
+    severity: WARNING
+    message: os.system() runs a shell command; command injection risk if input is untrusted. (CWE-78)
+    metadata: {cwe: ["CWE-78"], owasp: "A03:2021"}
+    pattern: os.system(...)
+  - id: aura.unsafe-deserialization
+    languages: [python]
+    severity: ERROR
+    message: Deserializing untrusted data with pickle/marshal/yaml.load can execute arbitrary code. (CWE-502)
+    metadata: {cwe: ["CWE-502"], owasp: "A08:2021"}
+    pattern-either:
+      - pattern: pickle.loads(...)
+      - pattern: pickle.load(...)
+      - pattern: marshal.loads(...)
+      - pattern: yaml.load(...)
+  - id: aura.sql-string-building
+    languages: [python]
+    severity: ERROR
+    message: SQL built with string formatting/concatenation is injectable. Use bound parameters. (CWE-89)
+    metadata: {cwe: ["CWE-89"], owasp: "A03:2021"}
+    pattern-either:
+      - pattern: $CUR.execute($Q % ..., ...)
+      - pattern: $CUR.execute($Q + ..., ...)
+      - pattern: $CUR.execute(f"...", ...)
+      - pattern: $CUR.execute("...".format(...), ...)
